@@ -1,0 +1,273 @@
+---
+title: "class 9 candy"
+author: "Patrick Nguyen (ID: A17680785)"
+format: pdf
+toc: true
+---
+
+## Background
+
+In today's mini-project we will analyze candy data with exploratory graphics , basic statistics , correlation analysis and principal component analysis methods we have been learning thus far.
+
+## Data Import
+
+The data comes as a CSV file from 538.
+
+```{r}
+candy_file <- ("candy-data.csv")
+candy = read.csv(candy_file, row.names=1)
+head(candy)
+```
+
+> Q1. How many different candy types are in this dataset?
+
+```{r}
+nrow(candy)
+```
+
+
+> Q2. How many fruity candy types are in the dataset?
+
+```{r}
+sum(candy$fruity)
+```
+
+> Q3. What is your favorite candy (other than Twix) in the dataset and what is it’s winpercent value?
+
+```{r}
+candy["Nestle Crunch", ]$winpercent
+```
+
+
+> Q4. What is the winpercent value for “Kit Kat”?
+
+```{r}
+candy["Kit Kat", ]$winpercent
+```
+
+
+> Q5. What is the winpercent value for “Tootsie Roll Snack Bars”?
+
+```{r}
+candy["Tootsie Roll Snack Bars", ]$winpercent
+```
+
+> Q6. Is there any variable/column that looks to be on a different scale to the majority of the other columns in the dataset?
+
+```{r}
+library("skimr")
+skim(candy)
+```
+
+The "winpercent" variable looks like it is on a different scale because the numbers it has for each column are a lot larger than the other variables.
+
+> Q7. What do you think a zero and one represent for the candy$chocolate column?
+
+```{r}
+candy$chocolate
+```
+The "0" likely represents a candy that doesn't have any chocolate while the "1" represents candy that does have chocolate in it.
+
+## Exploratory Analysis
+
+> Q8. Plot a histogram of winpercent values using both base R an ggplot2.
+
+```{r}
+library(ggplot2)
+ggplot(candy) +
+  aes(winpercent) +
+  geom_histogram(bins=12, fill="lightblue", col="gray")
+```
+
+```{r}
+hist(candy$winpercent, breaks=8)
+```
+
+
+
+> Q9. Is the distribution of winpercent values symmetrical?
+
+The distribution is not symmetrical 
+
+> Q10. Is the center of the distribution above or below 50%?
+
+```{r}
+mean(candy$winpercent)
+```
+
+```{r}
+summary(candy$winpercent)
+```
+
+```{r}
+ggplot(candy) +
+  aes(winpercent) +
+  geom_boxplot()
+```
+
+The center of the distribution is below 50%
+
+> Q11. On average is chocolate candy higher or lower ranked than fruit candy?
+
+Steps to solve this:
+1.Find all chocolate candy in the dataset
+2.Extract or find their winpercent values
+3.Calculate the mean of these values
+
+4.Find all fruit candy in the data set
+5.Find their winpercent
+6.Calculate their mean value
+
+```{r}
+chocolate_can <- candy[ candy$chocolate==1, ]
+choc.win <- chocolate_can$winpercent
+mean(choc.win)
+```
+
+```{r}
+fruit_can <- candy[ candy$fruity==1, ]
+fruit.win <- fruit_can$winpercent
+mean(fruit.win)
+```
+
+
+chocolate candy on average is higher ranked than fruit candy.
+
+> Q12. Is this difference statistically significant?
+
+```{r}
+t.test(choc.win, fruit.win)
+```
+
+The difference between these two candies is statistically significant
+
+## Overall Candy Rankings
+
+> Q13. What are the five least liked candy types in this set?
+
+```{r}
+head(candy[order(candy$winpercent),], n=5)
+```
+
+
+> Q14. What are the top 5 all time favorite candy types out of this set?
+
+```{r}
+tail(candy[order(candy$winpercent),], n=5)
+```
+
+> Q15. Make a first barplot of candy ranking based on winpercent values.
+
+```{r}
+library(ggplot2)
+
+ggplot(candy) + 
+  aes(winpercent, rownames(candy)) +
+  geom_col()
+
+ggsave("barplot1.png", height=10, width=6)
+```
+
+![](barplot1.png)
+
+> Q16. This is quite ugly, use the reorder() function to get the bars sorted by winpercent?
+
+```{r}
+ggplot(candy) + 
+  aes(winpercent, reorder(rownames(candy),winpercent)) +
+  geom_col() 
+ggsave("barplot2.png", height=10, width=6)
+```
+![](barplot2.png)
+
+> Q17. What is the worst ranked chocolate candy?
+
+```{r}
+my_cols=rep("black", nrow(candy))
+my_cols[as.logical(candy$chocolate)] = "chocolate"
+my_cols[as.logical(candy$bar)] = "brown"
+my_cols[as.logical(candy$fruity)] = "pink"
+```
+
+
+```{r}
+ggplot(candy) + 
+  aes(winpercent, reorder(rownames(candy),winpercent)) +
+  geom_col(fill=my_cols) 
+ggsave("barplot3.png", height=10, width=6)
+```
+![](barplot3.png)
+
+The worst ranked chocolate is sixlets
+
+> Q18. What is the best ranked fruity candy?
+
+The best ranked fruity candy is starburst
+
+## Taking a look at pricepercent
+
+Make a plot of winpercent vs the pricepercent
+
+```{r}
+my_cols[as.logical(candy$fruity)] = "red"
+
+ggplot(candy) +
+  aes(x=winpercent, y=pricepercent, label=rownames(candy)) +
+  geom_point(col=my_cols) +
+  geom_text(col=my_cols)
+```
+
+We can use **ggrepel** package for better label placment:
+
+```{r}
+library(ggrepel)
+
+my_cols[as.logical(candy$fruity)] = "red"
+
+ggplot(candy) +
+  aes(x=winpercent, y=pricepercent, label=rownames(candy)) +
+  geom_point(col=my_cols) +
+  geom_text_repel(col=my_cols, max.overlaps = 8, size = 3.3)
+```
+
+
+## Exploring the correlation structure
+
+Pearson correlation values range from -1 to +1
+
+```{r}
+library(corrplot)
+
+cij <- cor(candy)
+corrplot(cij)
+```
+
+## Principal Component Analysis
+
+```{r}
+pca <- prcomp(candy, scale=T)
+summary(pca)
+```
+
+The main results figure: the PCA score plot:
+
+```{r}
+ggplot(pca$x) +
+  aes(PC1, PC2, label=rownames(pca$x)) +
+  geom_point(col=my_cols) +
+  geom_text_repel(col=my_cols)
+  labs(title="PCA Candy Space Map")
+```
+
+The "loadings" plot for PC1
+
+```{r}
+ggplot(pca$rotation) +
+  aes(PC1, rownames(pca$rotation)) +
+  geom_col() 
+```
+
+
+> Q24. Complete the code to generate the loadings plot above. What original variables are picked up strongly by PC1 in the positive direction? Do these make sense to you? Where did you see this relationship highlighted previously?
+
+> Q25. Based on your exploratory analysis, correlation findings, and PCA results, what combination of characteristics appears to make a “winning” candy? How do these different analyses (visualization, correlation, PCA) support or complement each other in reaching this conclusion?
