@@ -9,7 +9,7 @@ Class 01 [Welcome to Bioinformatics](classworksheets/Patrick_Nguyen_-_Bimm_143_L
 
 Class 02 [Sequence alignment fundamentals, algorithms and applications](classworksheets/Patrick_Nguyen_-_BIMM_143_Lab_2.pdf)
 
-Class 03 [Advanced sequence alignment and database searching](classworksheets/lab03.pdf(1).pdf)
+Class 03 [Advanced sequence alignment and database searching](classworksheets/lab03.pdf.pdf)
 
 Class 04 [Bioinformatic data analysis with R](class4/class04.md)
 
