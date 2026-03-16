@@ -1,0 +1,13 @@
+{
+	"n_targets": 176981,
+	"n_bootstraps": 0,
+	"n_processed": 2959900,
+	"n_pseudoaligned": 586450,
+	"n_unique": 104980,
+	"p_pseudoaligned": 19.8,
+	"p_unique": 3.5,
+	"kallisto_version": "0.44.0",
+	"index_version": 10,
+	"start_time": "Wed Mar  4 20:31:07 2026",
+	"call": "kallisto quant -i hg19.ensembl -o SRR2156848_quant SRR2156848_1.fastq SRR2156849_2.fastq"
+}

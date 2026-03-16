@@ -1,0 +1,245 @@
+---
+title: "CLass 18: Pertussis Mini Project"
+author: "Patrick Nguyen (PID:A17680785)"
+format: pdf
+toc: TRUE
+---
+
+## Background
+Pertussis is a common lung infection caused by the bacteria B.Pertussis
+
+This can infect all ages but is most severe for those under 1 year of age.
+
+The CDC track the number of [reported cases in US](https://www.cdc.gov/pertussis/php/surveillance/pertussis-cases-by-year.html?CDC_AAref_Val=https://www.cdc.gov/pertussis/surv-reporting/cases-by-year.html)
+We can "scrape" those data with the **datapasta** package.
+
+```{r}
+cdc <- data.frame(
+                          Year = c(1922L,
+                                   1923L,1924L,1925L,1926L,1927L,1928L,
+                                   1929L,1930L,1931L,1932L,1933L,1934L,1935L,
+                                   1936L,1937L,1938L,1939L,1940L,1941L,
+                                   1942L,1943L,1944L,1945L,1946L,1947L,1948L,
+                                   1949L,1950L,1951L,1952L,1953L,1954L,
+                                   1955L,1956L,1957L,1958L,1959L,1960L,
+                                   1961L,1962L,1963L,1964L,1965L,1966L,1967L,
+                                   1968L,1969L,1970L,1971L,1972L,1973L,
+                                   1974L,1975L,1976L,1977L,1978L,1979L,1980L,
+                                   1981L,1982L,1983L,1984L,1985L,1986L,
+                                   1987L,1988L,1989L,1990L,1991L,1992L,1993L,
+                                   1994L,1995L,1996L,1997L,1998L,1999L,
+                                   2000L,2001L,2002L,2003L,2004L,2005L,
+                                   2006L,2007L,2008L,2009L,2010L,2011L,2012L,
+                                   2013L,2014L,2015L,2016L,2017L,2018L,
+                                   2019L,2020L,2021L,2022L,2023L,2024L,2025L),
+  No..Reported.Pertussis.Cases = c(107473,
+                                   164191,165418,152003,202210,181411,
+                                   161799,197371,166914,172559,215343,179135,
+                                   265269,180518,147237,214652,227319,103188,
+                                   183866,222202,191383,191890,109873,
+                                   133792,109860,156517,74715,69479,120718,
+                                   68687,45030,37129,60886,62786,31732,28295,
+                                   32148,40005,14809,11468,17749,17135,
+                                   13005,6799,7717,9718,4810,3285,4249,
+                                   3036,3287,1759,2402,1738,1010,2177,2063,
+                                   1623,1730,1248,1895,2463,2276,3589,
+                                   4195,2823,3450,4157,4570,2719,4083,6586,
+                                   4617,5137,7796,6564,7405,7298,7867,
+                                   7580,9771,11647,25827,25616,15632,10454,
+                                   13278,16858,27550,18719,48277,28639,
+                                   32971,20762,17972,18975,15609,18617,6124,
+                                   2116,3044,7063,22538,21996)
+)
+```
+
+
+
+
+> Q. Make a plot of `year vs ``cases`
+
+```{r}
+library(ggplot2)
+
+ggplot(cdc) +
+  aes(Year, No..Reported.Pertussis.Cases) +
+  geom_point() +
+  geom_line()
+
+```
+
+
+> Q. Add some major milestones including the first wP vaccine roll-out (1946), the switch to the newer aP vaccine (1996), the COVID years (2020).
+
+```{r}
+library(ggplot2)
+
+ggplot(cdc) +
+  aes(Year, No..Reported.Pertussis.Cases) +
+  geom_point() +
+  geom_line() +
+  geom_vline(xintercept= 1946, col="blue", lty=2) +
+  geom_vline(xintercept= 1996, col="red", lty=2) +
+  geom_vline(xintercept= 2020, col="gray", lty=2)
+
+```
+
+
+After the switch to the acellular pertussis (aP) vaccine, pertussis cases began rising again, with major peaks such as the 2012 outbreak. coud be due to bacterial evolution and immunity of the vaccine.
+
+**Why is this vaccine-preventable disease on the upswing?** To answer this question we need to investigate the mechanisms underlying waning protection against pertussis. This requires evaluation of pertussis-specific immune responses over time in wP and aP vaccinated individuals.
+
+
+# CMI-PB project
+[Computational Models of Immunity - Pertussis Boost project](https://www.cmi-pb.org/) aims to provide the scientific community with this very information. 
+
+They make their data abailablke via JSON format returning API. We can read this in R with the `read_json()` function from the **jsonlite** package:
+
+```{r}
+library(jsonlite)
+
+subject <- read_json("http://cmi-pb.org/api/v5_1/subject", simplifyVector = TRUE)
+
+head(subject)
+      
+```
+
+> Q. How many "wP" and "aP" individuals are in the `subject` table?
+
+```{r}
+table(subject$infancy_vac)
+```
+
+> Q. What is the biological sex breakdown?
+
+```{r}
+table(subject$biological_sex)
+```
+
+> Q. In terms of race and gender is this dataset representative of the US population?
+
+```{r}
+table(subject$race, subject$biological_sex)
+```
+
+Let's read some more database tables:
+
+```{r}
+specimen <- read_json( "http://cmi-pb.org/api/v5_1/specimen", simplifyVector = TRUE)
+
+ab_titer <- read_json( "http://cmi-pb.org/api/v5_1/plasma_ab_titer", simplifyVector = TRUE)
+```
+
+```{r}
+head(specimen)
+```
+
+```{r}
+head(ab_titer)
+```
+
+To analyze this data we need to first "join" (merge/link) the different tables so we have all the data in one place not spread across different tables.
+
+We can use the `*_join()` family of functions from **dplyr** to do this 
+
+```{r}
+library(dplyr)
+
+meta <- inner_join(subject, specimen)
+head(meta)
+```
+
+```{r}
+abdata <- inner_join(ab_titer, meta)
+head(abdata)
+```
+
+> Q. What Antibody isotypes are measured for these patients?
+
+```{r}
+table(abdata$isotype)
+```
+
+
+> Q. What antigens are reported?
+
+```{r}
+table(abdata$antigen)
+```
+
+Let's focus on the IgG antigen and make a plot of MFI_normalized for all anitgens. 
+
+
+```{r}
+igg <- abdata |>
+  filter(isotype == "IgG")
+
+head(igg)
+```
+
+```{r}
+ggplot(igg) +
+  aes(MFI_normalised, antigen) +
+  geom_boxplot()
+```
+
+> Q. Is there a difference for aP vs wP individuals with these values?
+
+```{r}
+ggplot(igg) +
+  aes(MFI_normalised, antigen) +
+  geom_boxplot() +
+  facet_wrap(~infancy_vac)
+```
+
+```{r}
+ggplot(igg) +
+  aes(MFI_normalised, antigen, col=infancy_vac) +
+  geom_boxplot()
+```
+> Q. Is there a temprol response - i.e do valujes increase or decrease over time?
+
+```{r}
+ggplot(igg) +
+  aes(MFI_normalised, antigen, col=infancy_vac) +
+  geom_boxplot() +
+  facet_wrap(~visit)
+```
+
+## Focus on "PT" Pertusisis toxin antigen
+
+```{r}
+pt.igg.21 <- igg |> filter(antigen == "PT",
+              dataset== "2021_dataset")
+```
+
+
+```{r}
+ggplot(pt.igg.21) +
+  aes(planned_day_relative_to_boost, MFI_normalised, col=infancy_vac, group = subject_id) +
+  geom_point() +
+  geom_line() +
+  geom_vline(xintercept = 14, lty=2)
+```
+
+## Final Graph
+
+```{r, warning=FALSE, fig.width = 8, fig.height = 5}
+ggplot(pt.igg.21) +
+  aes(planned_day_relative_to_boost, MFI_normalised, col=infancy_vac, group = subject_id) +
+  geom_point() +
+  geom_line() +
+  geom_vline(xintercept = 14, lty=2) +
+  geom_vline(xintercept = 0, lty=2) +
+  labs(
+    title = "CMI-PB 2021 dataset IgG PT",
+    subtitle = "Dashed lines at day 0 (pre boost) and day 14 (post boost)",
+    x = "Day relative to boost",
+    y = "Normalised MFI"
+  ) +
+  geom_smooth(aes(x = planned_day_relative_to_boost, y = MFI_normalised, group = infancy_vac), se= FALSE, , size = 2, span = .3) 
+  
+   
+```
+
+
+
