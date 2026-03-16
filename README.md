@@ -41,3 +41,7 @@ Class 18 [pertussis resurgence mini-project](class18/class18.md)
 
 Class 19 [Cancer mutation analysis mini-project](classworksheets/lab19.pdf)
 
+*Long Term Project*
+
+[Find a Gene Project](classworksheets/Find_A_Gene_Project(2).pdf)
+
