@@ -5,6 +5,12 @@ My classwork from BIMM 143 at [BIMM143](https://bioboot.github.io/bimm143_W26/) 
 
 *Introductory classes*
 
+Class 01 [Welcome to Bioinformatics](classworksheets/Patrick_Nguyen_-_Bimm_143_Lab_1__1_.pdf)
+
+Class 02 [Sequence alignment fundamentals, algorithms and applications](classworksheets/Patrick_Nguyen_-_BIMM_143_Lab_2.pdf)
+
+Class 03 [Advanced sequence alignment and database searching](classworksheets/lab03.pdf(1).pdf)
+
 Class 04 [Bioinformatic data analysis with R](class4/class04.md)
 
 Class 05 [Data viz with ggplot](class5/class5.md)
@@ -26,6 +32,8 @@ Class 12 [Genome informatics and high throughput sequencing](class12/class12.md)
 Class 13 [Transcriptomics, RNA-Seq analysis, and the interpretation of gene lists](class13/class13.md)
 
 Class 14 [RNA-Seq mini project](class14/class14.md)
+
+Class 16 [Essential UNIX for bioinformatics](classworksheets/HW8_unix_questions.pdf)
 
 Class 17 [Analyzing sequencing data in the cloud](class17/class17.md)
 
