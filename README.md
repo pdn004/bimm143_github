@@ -17,6 +17,8 @@ Class 08 [Unsupervised learning mini project](Class8/class8.md)
 
 Class 09 [Candy mini project](Class9/class9.md)
 
+Class 10 [Structural Bioinformatics (pt1)](Class10/class10.md)
+
 Class 11 [Structural Bioinformatics (pt2 AlphaFold)](class11/class11.md)
 
 Class 12 [Genome informatics and high throughput sequencing](class12/class12.md)
